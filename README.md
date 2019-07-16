@@ -1,5 +1,5 @@
 # SpamMessage
-Use the LSTM to train a spam message filter and convert the model to CoreML to predict locally
+Use the LSTM to train a spam message filter and convert the model to CoreML to predict on iPhone locally
 
 Done:
 * build model
