@@ -8,13 +8,25 @@
 
 import IdentityLookup
 import CoreML
+import os.log
 
-final class MessageFilterExtension: ILMessageFilterExtension {}
+extension OSLog {
+    private static var subsystem = Bundle.main.bundleIdentifier!
+    /// Logs the view cycles like viewDidLoad.
+    static let viewCycle = OSLog(subsystem: subsystem, category: "spamMessage")
+}
+
+final class MessageFilterExtension: ILMessageFilterExtension {
+    override init() {
+        print("message filter init")
+    }
+}
 
 extension MessageFilterExtension: ILMessageFilterQueryHandling {
     
     func handle(_ queryRequest: ILMessageFilterQueryRequest, context: ILMessageFilterExtensionContext, completion: @escaping (ILMessageFilterQueryResponse) -> Void) {
         // First, check whether to filter using offline data (if possible).
+        NSLog("the predict result is:")
         let offlineAction = self.offlineAction(for: queryRequest)
         
         switch offlineAction {
@@ -55,11 +67,18 @@ extension MessageFilterExtension: ILMessageFilterQueryHandling {
         do {
             let predict = try MessageClassifier().prediction(message: vec).label
             text = predict
+            NSLog("the predict result is: \(String(text))")
+            
+            os_log("The %{PUBLIC}@ logged in", log: OSLog.viewCycle , type: .info, text)
+            
         }catch{
             text = "No Prediction"
         }
         
         if text == "spam"{
+            return .filter
+        }
+        if messageBody.contains("good day"){
             return .filter
         }
         
